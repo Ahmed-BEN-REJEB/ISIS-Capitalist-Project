@@ -11,6 +11,9 @@
 
 # dependencies
 /node_modules
+/userworlds/*.json
+
+!/userworlds/.gitkeep
 
 # IDEs and editors
 /.idea
