@@ -4,7 +4,11 @@
 Un royaume médiéval de pierre, de bois et de bannières. Le joueur dirige une armée et développe son économie. Le registre est noble et atmosphérique, sans violence graphique. Les illustrations sont peintes avec des matières réalistes et des silhouettes immédiatement identifiables.
 
 ## Palette et interface
-Fond bleu nuit `#0b111b`, surfaces `#131d29`, acier `#263342`, texte ivoire `#f0e8d8`, texte secondaire `#aeb8c5`, or ancien `#d6b579`, bordeaux `#792f40`, succès sauge `#9bc8ac`. L'or indique les ressources et actions principales. Le bordeaux est réservé aux bannières et accents. Les états sont aussi exprimés par du texte, pas seulement la couleur.
+Interface claire : fond parchemin `#eee3cf`, surfaces crème `#fff8e9`, bordures `#c9b493`,
+texte brun `#382719`, texte secondaire `#6c5742`, accent bronze `#825626`,
+rouge sombre `#863c2e`, succès vert `#42623c`. Les illustrations gardent leurs fonds
+bleu nuit et leurs matières d'origine. Les états sont exprimés par du texte, pas seulement la couleur.
+Pas de symboles décoratifs ni de slogans dans l'interface.
 
 Titres avec une sérif classique (Georgia), interface avec une sans-sérif système. Chiffres tabulaires. Bordures fines bronze, angles modérément arrondis, ombres discrètes. Aucun texte intégré dans les images. Navigation clavier, focus visible, réduction des animations et fenêtres modales avec focus capturé.
 

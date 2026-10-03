@@ -59,7 +59,7 @@ export function ProductCard({
         />
         <span className="quantity">× {number(p.quantite)}</span>
         {!running && p.quantite > 0 && !p.managerUnlocked && (
-          <span className="play-hint">▶</span>
+          <span className="play-hint">Produire</span>
         )}
       </button>
       <div className="product-content">
@@ -108,7 +108,7 @@ export function ProductCard({
               : "Tous les paliers atteints"}
           </span>
           <span>
-            {next ? Math.min(p.quantite, next.seuil) + "/" + next.seuil : "✓"}
+            {next ? Math.min(p.quantite, next.seuil) + "/" + next.seuil : ""}
           </span>
         </div>
       </div>

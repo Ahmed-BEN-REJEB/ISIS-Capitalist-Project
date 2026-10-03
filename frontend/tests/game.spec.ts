@@ -55,7 +55,7 @@ test("production, achats, managers, persistance et isolation de deux joueurs", a
   await page.getByRole("button", { name: "Entrer dans ce royaume" }).click();
   await expect(warrior.locator(".quantity")).toHaveText("× 1");
   await expect(page.getByTestId("money")).toHaveText("100 or");
-  await page.getByRole("button", { name: /Commandants/ }).click();
+  await page.getByRole("button", { name: /Managers/ }).click();
   await page
     .getByRole("button", { name: "Engager 100 or", exact: true })
     .click();
@@ -111,7 +111,7 @@ test("bonus individuels et collectifs, achats Max, anges et renaissance", async 
       await expect(card.locator(".quantity")).toHaveText("× " + n * 10);
     }
   }
-  await page.getByRole("button", { name: /Paliers de gloire/ }).click();
+  await page.getByRole("button", { name: /Unlocks/ }).click();
   await page.getByLabel("Afficher tous les paliers").check();
   await expect(
     page
@@ -119,7 +119,7 @@ test("bonus individuels et collectifs, achats Max, anges et renaissance", async 
       .locator(".."),
   ).toContainText("Acquis");
   await page.getByRole("button", { name: "Fermer" }).click();
-  await page.getByRole("button", { name: /Arsenal/ }).click();
+  await page.getByRole("button", { name: /Upgrades/ }).click();
   await page
     .getByRole("button", { name: "Acquérir 1 000 or", exact: true })
     .click();
@@ -127,16 +127,17 @@ test("bonus individuels et collectifs, achats Max, anges et renaissance", async 
     page.getByRole("heading", { name: "Forge du guerrier" }),
   ).toHaveCount(0);
   await page.getByRole("button", { name: "Fermer" }).click();
-  await page.getByRole("button", { name: /Héritage Investisseurs/ }).click();
-  await page.getByRole("button", { name: /Réclamer 150 anges/ }).click();
+  await page.getByRole("button", { name: /Investors/ }).click();
+  await page.getByRole("button", { name: /Reset du monde/ }).click();
   await page.getByRole("button", { name: "Annuler", exact: true }).click();
-  await page.getByRole("button", { name: /Réclamer 150 anges/ }).click();
-  await page.getByRole("button", { name: "Confirmer la renaissance" }).click();
+  await page.getByRole("button", { name: /Reset du monde/ }).click();
+  await page.getByRole("button", { name: "Confirmer le reset" }).click();
   await expect(page.locator(".angel-stats").first()).toContainText("150");
   await page.getByRole("button", { name: "Fermer" }).click();
   await expect(page.getByTestId("product-1").locator(".quantity")).toHaveText(
     "× 1",
   );
+  await page.getByRole("button", { name: /Upgrades/ }).click();
   await page.getByRole("button", { name: /Bénédictions/ }).click();
   await page
     .getByRole("button", { name: "Acquérir 10 anges", exact: true })
@@ -165,7 +166,7 @@ test("responsive, images, clavier et erreurs réseau", async ({ page }) => {
     path: "../artifacts/kingdom-desktop.png",
     fullPage: true,
   });
-  await page.getByRole("button", { name: /Commandants/ }).click();
+  await page.getByRole("button", { name: /Managers/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.screenshot({
     path: "../artifacts/kingdom-managers.png",
@@ -277,4 +278,66 @@ test("une réponse de mutation perdue ne provoque pas un achat en double", async
     "× 2",
   );
   expect(purchases).toBe(1);
+});
+test("reset sans nouvel ange : annulation puis confirmation, sauvegarde et interface simplifiée", async ({
+  page,
+}) => {
+  const user = "zero-reset-" + Date.now();
+  await select(page, user);
+  await page
+    .getByTestId("product-1")
+    .getByRole("button", { name: /Recruter/ })
+    .click();
+  await expect(page.getByTestId("product-1").locator(".quantity")).toHaveText(
+    "× 2",
+  );
+  await page.getByRole("button", { name: "Investors", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Investors" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Reset du monde" }),
+  ).toBeEnabled();
+  await page.screenshot({ path: "../artifacts/investors-light.png" });
+  await page.getByRole("button", { name: "Reset du monde" }).click();
+  await expect(page.locator(".reset-confirm")).toContainText("0 anges");
+  await page.getByRole("button", { name: "Annuler", exact: true }).click();
+  await page.getByRole("button", { name: "Fermer", exact: true }).click();
+  await expect(page.getByTestId("product-1").locator(".quantity")).toHaveText(
+    "× 2",
+  );
+  await page.getByRole("button", { name: "Investors", exact: true }).click();
+  await page.getByRole("button", { name: "Reset du monde" }).click();
+  await page.getByRole("button", { name: "Confirmer le reset" }).click();
+  await expect(page.getByTestId("product-1").locator(".quantity")).toHaveText(
+    "× 1",
+  );
+  await page.reload();
+  await expect(page.getByTestId("money")).toHaveText("100 or");
+  const labels = await page.locator(".sidebar .nav-item").allTextContents();
+  expect(
+    labels.map((label) =>
+      label
+        .trim()
+        .replace(/[0-9]+$/, "")
+        .trim(),
+    ),
+  ).toEqual(["Royaume", "Unlocks", "Upgrades", "Managers", "Investors"]);
+  await expect(page.locator("body")).not.toContainText(
+    "Chaque grande conquête",
+  );
+});
+test("montants lisibles et regroupement des upgrades", async ({ page }) => {
+  const user = "readable-" + Date.now();
+  await seed(user);
+  await select(page, user);
+  await expect(page.getByTestId("money")).toContainText("milliard");
+  await page.getByRole("button", { name: /Upgrades/ }).click();
+  await expect(page.getByRole("button", { name: /Arsenal/ })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByRole("button", { name: /Bénédictions/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Ferveur des anges" }),
+  ).toBeVisible();
+  await page.screenshot({ path: "../artifacts/upgrades-light.png" });
 });

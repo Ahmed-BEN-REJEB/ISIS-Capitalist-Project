@@ -96,7 +96,11 @@ describe("projection locale du contrat backend", () => {
   });
   it("formate les valeurs et la durée à la dixième", () => {
     expect(number(45000)).toContain("45");
-    expect(number(1000000)).toBe("1.000e+6");
+    expect(number(1000000)).toBe("1 million");
+    expect(number(776000000)).toBe("776 millions");
+    expect(number(1500000000)).toBe("1,5 milliard");
+    expect(number(2500000000)).toBe("2,5 milliards");
+    expect(number(1e12)).toBe("1 billion");
     expect(duration(3661500)).toBe("01:01:01.5");
     expect(duration(-10)).toBe("00:00:00.0");
   });

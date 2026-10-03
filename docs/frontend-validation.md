@@ -21,7 +21,7 @@ pas pour reproduire son application de patients.
 | Unlocks / allunlocks | Seuil individuel ou minimum de toutes les quantités ; prochain palier ou tous |
 | Anges et reset | Actifs, bonus, nouveaux anges, score cumulé, confirmation de renaissance |
 | Angel upgrades | Dépense d'anges actifs, effet explicite et recalcul du bonus passif |
-| Grands nombres | Notation scientifique à quatre chiffres significatifs à partir de 10⁶ |
+| Grands nombres | Noms français : millions, milliards, billions… à partir de 10⁶ |
 | Notifications | Achats, engagements, bonus et paliers ; erreurs et bouton de reprise |
 | Persistance / utilisateurs | Sauvegardes serveur, identité locale, chargement isolé à chaque changement |
 | Autres mondes | Origine configurable, données et identifiants dynamiques, pas d'index id−1 |
@@ -66,6 +66,21 @@ les compilations de production des deux applications ont été exécutés. L'aud
 frontend ne signale aucune vulnérabilité avec le verrou de dépendances livré.
 Les 18 fichiers graphiques ont été contrôlés (17 illustrations distinctes et un alias historique).
 Les captures bureau, mobile et commandants ont été inspectées visuellement.
+
+## Adaptations de l’interface
+
+Navigation : Royaume, Unlocks, Upgrades, Managers, Investors. Upgrades regroupe Arsenal
+et Bénédictions, avec un compteur d’achats possibles pour chaque vue. Investors est réduit
+aux anges actifs, au bonus par ange, aux anges récupérables et au reset confirmé.
+Le reset est possible même sans nouvel ange ; un avertissement indique explicitement ce cas.
+La formule des anges et les règles de conservation du backend ne changent pas.
+La palette de l’interface est désormais beige, brune et rouge sombre. Les illustrations sont conservées.
+Les sauvegardes réelles ne sont pas utilisées par les tests ; le cache Next.js des tests est séparé
+dans `.next-e2e` pour laisser le serveur de développement utilisateur ouvert.
+
+Validation du 4 octobre 2026 : les 9 tests unitaires frontend et les 8 parcours Chromium
+passent, dont le reset à zéro ange (annulation, confirmation et rechargement), le nouveau
+menu et les deux vues d'Upgrades. Contrôles TypeScript et lint réussis.
 
 ## Limites connues
 

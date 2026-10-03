@@ -24,7 +24,10 @@ export default defineConfig({
       command: "npm run dev -- --port 3101",
       url: "http://localhost:3101",
       reuseExistingServer: false,
-      env: { NEXT_PUBLIC_BACKEND_URL: "http://localhost:3100" },
+      env: {
+        NEXT_PUBLIC_BACKEND_URL: "http://localhost:3100",
+        NEXT_DIST_DIR: ".next-e2e",
+      },
       timeout: 120000,
     },
   ],

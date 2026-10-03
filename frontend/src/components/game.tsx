@@ -17,18 +17,16 @@ import { Modal } from "./modal";
 type Panel =
   | "managers"
   | "upgrades"
-  | "angelupgrades"
   | "unlocks"
   | "investors"
   | "settings"
   | "help"
   | null;
 const titles = {
-  managers: "Commandants",
-  upgrades: "Arsenal",
-  angelupgrades: "Bénédictions",
-  unlocks: "Paliers de gloire",
-  investors: "Héritage des anges",
+  managers: "Managers",
+  upgrades: "Upgrades",
+  unlocks: "Unlocks",
+  investors: "Investors",
   settings: "Votre royaume",
   help: "L’art de régner",
 };
@@ -92,7 +90,7 @@ function Unlocks({ world, origin }: { world: World; origin: string }) {
                 />
                 <small>
                   {p.unlocked
-                    ? "✓ Acquis"
+                    ? "Acquis"
                     : number(group.quantity) +
                       " / " +
                       number(p.seuil) +
@@ -114,6 +112,9 @@ export function Game() {
   const { world, session, busy, error } = game;
   const [mode, setMode] = useState<BuyMode>(1);
   const [panel, setPanel] = useState<Panel>(null);
+  const [upgradeKind, setUpgradeKind] = useState<"upgrades" | "angelupgrades">(
+    "upgrades",
+  );
   const [confirmReset, setConfirmReset] = useState(false);
   const origin = session?.origin || defaultOrigin;
   const disabled = busy || !!error;
@@ -123,47 +124,24 @@ export function Game() {
     setPanel(null);
     setConfirmReset(false);
   };
-  const menu: {
-    panel: Exclude<Panel, null>;
-    symbol: string;
-    label: string;
-    subtitle: string;
-    count?: number;
-  }[] = [
-    {
-      panel: "managers",
-      symbol: "⚑",
-      label: "Commandants",
-      subtitle: "Managers · production auto",
-      count: world ? available(world.managers, world.money) : 0,
-    },
-    {
-      panel: "upgrades",
-      symbol: "⚒",
-      label: "Arsenal",
-      subtitle: "Cash upgrades",
-      count: world ? available(world.upgrades, world.money) : 0,
-    },
-    {
-      panel: "unlocks",
-      symbol: "♜",
-      label: "Paliers de gloire",
-      subtitle: "Unlocks · exploits de l’armée",
-    },
-    {
-      panel: "investors",
-      symbol: "✧",
-      label: "Héritage",
-      subtitle: "Investisseurs angéliques",
-    },
-    {
-      panel: "angelupgrades",
-      symbol: "✦",
-      label: "Bénédictions",
-      subtitle: "Angel upgrades",
-      count: world ? available(world.angelupgrades, world.activeangels) : 0,
-    },
-  ];
+  const menu: { panel: Exclude<Panel, null>; label: string; count?: number }[] =
+    [
+      { panel: "unlocks", label: "Unlocks" },
+      {
+        panel: "upgrades",
+        label: "Upgrades",
+        count: world
+          ? available(world.upgrades, world.money) +
+            available(world.angelupgrades, world.activeangels)
+          : 0,
+      },
+      {
+        panel: "managers",
+        label: "Managers",
+        count: world ? available(world.managers, world.money) : 0,
+      },
+      { panel: "investors", label: "Investors" },
+    ];
   const autoIncome =
     world?.products
       .filter((p) => p.managerUnlocked)
@@ -189,11 +167,7 @@ export function Game() {
         <div className="sidebar-divider" />
         <p className="nav-label">VOTRE DOMAINE</p>
         <button className="nav-item selected" onClick={close}>
-          <span className="nav-symbol">♜</span>
-          <span>
-            Le royaume<small>Votre armée en campagne</small>
-          </span>
-          <span className="nav-arrow">›</span>
+          Royaume
         </button>
         {menu.map((item) => (
           <button
@@ -202,25 +176,13 @@ export function Game() {
             disabled={!world}
             onClick={() => setPanel(item.panel)}
           >
-            <span className="nav-symbol">{item.symbol}</span>
-            <span>
-              {item.label}
-              <small>{item.subtitle}</small>
-            </span>
+            <span>{item.label}</span>
             {!!item.count && <span className="badge">{item.count}</span>}
           </button>
         ))}
         <div className="sidebar-bottom">
-          <div className="legacy-note">
-            <span>✧</span>
-            <p>
-              Les royaumes passent.
-              <br />
-              <strong>Votre légende demeure.</strong>
-            </p>
-          </div>
           <button className="text-button" onClick={() => setPanel("help")}>
-            Guide du souverain ↗
+            Règles du jeu
           </button>
           <small>ISIS CAPITALIST · ÉDITION MÉDIÉVALE</small>
         </div>
@@ -244,10 +206,9 @@ export function Game() {
               onClick={() => setPanel("settings")}
             >
               <span className="avatar">
-                {session?.user.slice(0, 1).toUpperCase() || "♔"}
+                {session?.user.slice(0, 1).toUpperCase() || "J"}
               </span>
               {session?.user || "Votre royaume"}
-              <span>⌄</span>
             </button>
             <button
               className="icon-button"
@@ -256,7 +217,7 @@ export function Game() {
               aria-label="Actualiser le monde"
               title="Actualiser"
             >
-              ↻
+              Actualiser
             </button>
           </div>
         </header>
@@ -264,23 +225,13 @@ export function Game() {
           className="hero"
           style={{
             backgroundImage:
-              'linear-gradient(90deg,rgba(8,15,24,.94),rgba(8,15,24,.25)),url("' +
+              'linear-gradient(90deg,rgba(55,32,19,.87),rgba(55,32,19,.12)),url("' +
               asset(origin, "icones/kingdom-background.webp") +
               '")',
           }}
         >
-          <span className="eyebrow">FORGEZ VOTRE LÉGENDE</span>
-          <h1>
-            Un royaume.
-            <br />
-            <em>Votre destinée.</em>
-          </h1>
-          <p>
-            Rassemblez vos forces. Élevez votre armée.
-            <br />
-            Écrivez un règne dont on se souviendra.
-          </p>
-          <span className="hero-seal">✦ &nbsp; L’ÂGE DES CONQUÊTES</span>
+          <h1>{world?.name || "War Toy Kingdom"}</h1>
+          <p>Développez votre armée et les revenus de votre royaume.</p>
         </section>
         {error && (
           <div className="error-banner" role="alert">
@@ -293,7 +244,6 @@ export function Game() {
         )}
         {!world ? (
           <section className="loading-state" role="status">
-            <span className="loading-crest">♜</span>
             <h2>
               {error ? "Le royaume vous attend" : "Ouverture des portes…"}
             </h2>
@@ -306,7 +256,6 @@ export function Game() {
           <>
             <section className="treasury" aria-label="Ressources du royaume">
               <div className="main-resource">
-                <span className="coin">◈</span>
                 <div>
                   <span className="eyebrow">TRÉSOR DU ROYAUME</span>
                   <strong data-testid="money">
@@ -326,7 +275,7 @@ export function Game() {
               >
                 <span>Anges actifs</span>
                 <strong>
-                  ✧ {number(world.activeangels)}{" "}
+                  {number(world.activeangels)}{" "}
                   <small>
                     +{number(world.activeangels * world.angelbonus)} %
                   </small>
@@ -356,7 +305,6 @@ export function Game() {
                 >
                   Recrutement{" "}
                   <strong>{mode === "Max" ? "Max" : "×" + mode}</strong>
-                  <span>⇄</span>
                 </button>
               </div>
               <p className="army-tip">
@@ -379,9 +327,6 @@ export function Game() {
             </section>
             <footer className="game-footer">
               <span>
-                ✦ Chaque grande conquête commence par un premier guerrier.
-              </span>
-              <span>
                 Progression propre à <strong>{session?.user}</strong>
               </span>
             </footer>
@@ -389,7 +334,7 @@ export function Game() {
         )}
       </main>
       <div className="toast-region" aria-live="polite" aria-atomic="true">
-        {game.toast && <div className="toast">✓ {game.toast}</div>}
+        {game.toast && <div className="toast">{game.toast}</div>}
       </div>
       {panel && (
         <Modal title={titles[panel]} onClose={close}>
@@ -429,10 +374,6 @@ export function Game() {
                   required
                 />
               </label>
-              <p className="muted">
-                Projet académique : l’identifiant n’est pas un mot de passe. Une
-                autre personne connaissant ce nom peut accéder au même monde.
-              </p>
               <button className="primary-button" type="submit">
                 Entrer dans ce royaume
               </button>
@@ -461,11 +402,6 @@ export function Game() {
                 recommencer plus fort. Les bénédictions coûtent des anges actifs
                 : leur bonus passif diminue lorsque vous les dépensez.
               </p>
-              <p className="muted">
-                Les montants à partir d’un million sont affichés en notation
-                scientifique : 1.000e+6 = 1 000 000. Les achats sont vérifiés et
-                sauvegardés par le backend.
-              </p>
             </div>
           ) : (
             world && (
@@ -473,12 +409,10 @@ export function Game() {
                 {panel === "unlocks" && (
                   <Unlocks world={world} origin={origin} />
                 )}
-                {(
-                  ["managers", "upgrades", "angelupgrades"] as Panel[]
-                ).includes(panel) &&
+                {(panel === "managers" || panel === "upgrades") &&
                   (() => {
-                    const kind = panel as
-                      "managers" | "upgrades" | "angelupgrades";
+                    const kind =
+                      panel === "managers" ? "managers" : upgradeKind;
                     const currency =
                       kind === "angelupgrades"
                         ? world.activeangels
@@ -486,12 +420,45 @@ export function Game() {
                     const items = world[kind].filter((p) => !p.unlocked);
                     return (
                       <>
+                        {panel === "upgrades" && (
+                          <div
+                            className="upgrade-tabs"
+                            role="group"
+                            aria-label="Type d’amélioration"
+                          >
+                            <button
+                              aria-pressed={upgradeKind === "upgrades"}
+                              onClick={() => setUpgradeKind("upgrades")}
+                            >
+                              Arsenal
+                              {world && (
+                                <span className="tab-count">
+                                  {available(world.upgrades, world.money)}
+                                </span>
+                              )}
+                            </button>
+                            <button
+                              aria-pressed={upgradeKind === "angelupgrades"}
+                              onClick={() => setUpgradeKind("angelupgrades")}
+                            >
+                              Bénédictions
+                              {world && (
+                                <span className="tab-count">
+                                  {available(
+                                    world.angelupgrades,
+                                    world.activeangels,
+                                  )}
+                                </span>
+                              )}
+                            </button>
+                          </div>
+                        )}
                         <p className="modal-description">
                           {kind === "managers"
                             ? "Confiez vos unités à un commandant : elles produiront sans interruption."
                             : kind === "upgrades"
                               ? "Équipez votre armée. Chaque amélioration est permanente jusqu’à la prochaine renaissance."
-                              : "Sacrifiez des anges actifs pour obtenir des bonus. Leur bonus passif sera recalculé."}
+                              : "Ces améliorations coûtent des anges actifs."}
                         </p>
                         <div className="modal-balance">
                           Disponible : {number(currency)}{" "}
@@ -543,14 +510,6 @@ export function Game() {
                   })()}
                 {panel === "investors" && (
                   <div className="investors">
-                    <img
-                      src={asset(origin, "icones/angel.svg")}
-                      alt="Emblème des anges"
-                      width={150}
-                      height={150}
-                    />
-                    <p className="eyebrow">UNE FIN. UN NOUVEAU COMMENCEMENT.</p>
-                    <h3>Votre héritage traverse les âges.</h3>
                     <div className="angel-stats">
                       <div>
                         <strong>{number(world.activeangels)}</strong>
@@ -577,7 +536,8 @@ export function Game() {
                     {confirmReset ? (
                       <div className="reset-confirm">
                         <strong>
-                          Abandonner ce règne et réclamer les anges ?
+                          Réinitialiser le monde et récupérer{" "}
+                          {number(angelsGained(world))} anges ?
                         </strong>
                         <div>
                           <button onClick={() => setConfirmReset(false)}>
@@ -591,25 +551,23 @@ export function Game() {
                               setConfirmReset(false);
                             }}
                           >
-                            Confirmer la renaissance
+                            Confirmer le reset
                           </button>
                         </div>
                       </div>
                     ) : (
                       <button
                         className="primary-button"
-                        disabled={disabled || angelsGained(world) <= 0}
+                        disabled={disabled}
                         onClick={() => setConfirmReset(true)}
                       >
-                        Réclamer {number(angelsGained(world))} anges et
-                        recommencer
+                        Reset du monde
                       </button>
                     )}
                     {angelsGained(world) === 0 && (
-                      <small>
-                        Continuez à produire pour constituer votre prochain
-                        héritage.
-                      </small>
+                      <p className="reset-warning">
+                        Ce reset ne rapporte aucun nouvel ange.
+                      </p>
                     )}
                   </div>
                 )}

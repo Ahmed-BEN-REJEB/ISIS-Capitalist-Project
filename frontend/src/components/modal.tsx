@@ -31,11 +31,10 @@ export function Modal({
       <div className="modal-inner">
         <header className="modal-header">
           <div>
-            <span className="eyebrow">LE CONSEIL DU ROYAUME</span>
             <h2 id="modal-title">{title}</h2>
           </div>
           <button className="icon-button" onClick={onClose} aria-label="Fermer">
-            ✕
+            Fermer
           </button>
         </header>
         {children}

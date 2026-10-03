@@ -66,9 +66,22 @@ export function projectWorld(source: World, elapsed: number): World {
 }
 export function number(value: number): string {
   if (!Number.isFinite(value)) return "—";
-  return Math.abs(value) >= 1e6
-    ? value.toExponential(3)
-    : value.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+  const units = [
+    { scale: 1e18, name: "trillion" },
+    { scale: 1e15, name: "billiard" },
+    { scale: 1e12, name: "billion" },
+    { scale: 1e9, name: "milliard" },
+    { scale: 1e6, name: "million" },
+  ];
+  const unit = units.find(({ scale }) => Math.abs(value) >= scale);
+  if (!unit) return value.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+  const amount = value / unit.scale;
+  return (
+    amount.toLocaleString("fr-FR", { maximumFractionDigits: 2 }) +
+    " " +
+    unit.name +
+    (Math.abs(amount) >= 2 ? "s" : "")
+  );
 }
 export function duration(ms: number): string {
   const tenths = Math.max(0, Math.ceil(ms / 100));
