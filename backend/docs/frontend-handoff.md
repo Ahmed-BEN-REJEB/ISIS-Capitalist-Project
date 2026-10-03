@@ -46,7 +46,7 @@ Le frontend utilise :
 plage du scalaire GraphQL `Int`. Il reste un `number` côté TypeScript et ne nécessite donc pas de
 traitement particulier dans le frontend.
 
-## Inventaire graphique actif
+## Inventaire graphique initial (remplacé)
 
 | Usage | Chemin actuel | État avant direction artistique |
 |---|---|---|
@@ -68,5 +68,17 @@ frontend. La prochaine phase graphique devra définir une direction artistique m
 une silhouette lisible à petite taille, des fonds et bordures homogènes, puis exporter chaque actif
 dans un format et des dimensions uniformes.
 
-Les fichiers raster non référencés présents dans `public/icones` sont conservés comme sources de
-comparaison pour cette phase ; ils ne font pas partie du contrat actif.
+## État après intégration frontend
+
+Les placeholders ci-dessus ont été remplacés par les illustrations finales médiévales.
+Les anciennes URL sont préservées ; les SVG embarquent un WebP 512 × 512.
+Les managers utilisent maintenant `marcus.webp`, `elric.webp`, `kael.webp`, `drax.webp`,
+`vorn.webp` et `arkon.webp`. Les cash upgrades individuels utilisent le logo du produit ciblé.
+`manager.svg` reste disponible comme alias de compatibilité.
+
+Le panorama `icones/kingdom-background.webp` est exporté en 1600 × 900.
+Les six anciens rasters non référencés ont été retirés ; leurs versions précédentes restent dans Git.
+La migration cosmétique des anciennes sauvegardes conserve leur progression.
+
+Le frontend Next.js est dans `../../frontend`, sur le port 3001 par défaut.
+Voir la bible visuelle et la matrice de validation dans le dossier `../../docs`.

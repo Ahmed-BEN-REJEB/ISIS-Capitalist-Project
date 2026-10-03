@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdtempSync, unlinkSync, rmdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { AppService } from './app.service.js';
 import { RatioType, World } from './graphql.js';
@@ -23,6 +24,34 @@ describe('AppService', () => {
     expect(world.upgrades.length).toBeGreaterThanOrEqual(10);
     expect(world.angelupgrades.length).toBeGreaterThan(0);
     expect(world.managers).toHaveLength(6);
+  });
+
+  it('migrates legacy illustrations without changing saved progression after a service restart', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'kingdom-art-test-'));
+    const previous = process.env.WORLDS_DIR;
+    process.env.WORLDS_DIR = directory;
+    try {
+      const writer = new AppService();
+      const saved = writer.cloneWorld(origworld);
+      saved.money = 12345;
+      saved.products[0].quantite = 42;
+      saved.managers[0].unlocked = true;
+      saved.managers[0].logo = 'icones/manager.svg';
+      saved.upgrades[0].logo = 'icones/upgrade.svg';
+      writer.saveWorld('migration', saved);
+      const reader = new AppService();
+      const restored = reader.readUserWorld('migration');
+      expect(restored.money).toBe(12345);
+      expect(restored.products[0].quantite).toBe(42);
+      expect(restored.managers[0].unlocked).toBe(true);
+      expect(restored.managers[0].logo).toBe('icones/marcus.webp');
+      expect(restored.upgrades[0].logo).toBe(restored.products[0].logo);
+    } finally {
+      if (previous === undefined) delete process.env.WORLDS_DIR;
+      else process.env.WORLDS_DIR = previous;
+      unlinkSync(join(directory, 'migration-world.json'));
+      rmdirSync(directory);
+    }
   });
 
   it('references an existing static asset for every visual element', () => {
