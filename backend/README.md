@@ -29,6 +29,9 @@ npm run start:dev
 Le serveur écoute sur `http://localhost:3000`. L'interface GraphQL est disponible sous
 `http://localhost:3000/graphql` et les images sous `http://localhost:3000/icones/...`.
 
+La synthèse du monde, le contrat destiné au frontend et l'inventaire des icônes sont regroupés
+dans [`docs/frontend-handoff.md`](docs/frontend-handoff.md).
+
 ## Vérifications
 
 ```bash

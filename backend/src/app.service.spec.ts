@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { AppService } from './app.service.js';
 import { RatioType, World } from './graphql.js';
 import { origworld } from './origworld.js';
@@ -21,6 +23,25 @@ describe('AppService', () => {
     expect(world.upgrades.length).toBeGreaterThanOrEqual(10);
     expect(world.angelupgrades.length).toBeGreaterThan(0);
     expect(world.managers).toHaveLength(6);
+  });
+
+  it('references an existing static asset for every visual element', () => {
+    const logos = [
+      world.logo,
+      ...world.products.flatMap((product) => [
+        product.logo,
+        ...product.paliers.map((candidate) => candidate.logo),
+      ]),
+      ...world.allunlocks.map((candidate) => candidate.logo),
+      ...world.upgrades.map((candidate) => candidate.logo),
+      ...world.angelupgrades.map((candidate) => candidate.logo),
+      ...world.managers.map((candidate) => candidate.logo),
+    ];
+
+    for (const logo of new Set(logos)) {
+      expect(logo).toMatch(/^icones\/[\w.-]+$/);
+      expect(existsSync(join(process.cwd(), 'public', logo)), logo).toBe(true);
+    }
   });
 
   it('calculates a geometric purchase price and updates the next unit price', () => {

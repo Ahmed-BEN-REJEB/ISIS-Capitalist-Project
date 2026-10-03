@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { existsSync, unlinkSync } from 'node:fs';
@@ -12,12 +12,8 @@ describe('AppController (e2e)', () => {
   const worldFile = join(process.cwd(), 'userworlds', `${testUser}-world.json`);
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    app = await NestFactory.create(AppModule, { logger: false });
+    await app.listen(0);
   });
 
   it('/ (GET)', () => {
@@ -81,6 +77,15 @@ describe('AppController (e2e)', () => {
       .expect(200);
 
     expect(response.text).toContain('<title>GraphiQL</title>');
+  });
+
+  it('/icones serves the world assets through ServeStaticModule', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/icones/war-world.svg')
+      .expect(200)
+      .expect('Content-Type', /image\/svg\+xml/);
+
+    expect(Buffer.from(response.body).toString('utf8')).toContain('<svg');
   });
 
   afterEach(async () => {
