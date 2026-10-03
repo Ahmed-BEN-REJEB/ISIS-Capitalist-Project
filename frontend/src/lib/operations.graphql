@@ -1,0 +1,81 @@
+fragment Reward on Palier {
+  name
+  logo
+  seuil
+  idcible
+  ratio
+  typeratio
+  unlocked
+}
+fragment Kingdom on World {
+  name
+  logo
+  money
+  score
+  totalangels
+  activeangels
+  angelbonus
+  lastupdate
+  products {
+    id
+    name
+    logo
+    cout
+    croissance
+    revenu
+    vitesse
+    quantite
+    timeleft
+    managerUnlocked
+    paliers {
+      ...Reward
+    }
+  }
+  managers {
+    ...Reward
+  }
+  upgrades {
+    ...Reward
+  }
+  angelupgrades {
+    ...Reward
+  }
+  allunlocks {
+    ...Reward
+  }
+}
+query GetWorld($user: String!) {
+  getWorld(user: $user) {
+    ...Kingdom
+  }
+}
+mutation Buy($user: String!, $id: Int!, $quantite: Int!) {
+  acheterQtProduit(user: $user, id: $id, quantite: $quantite) {
+    id
+  }
+}
+mutation Launch($user: String!, $id: Int!) {
+  lancerProductionProduit(user: $user, id: $id) {
+    id
+  }
+}
+mutation Hire($user: String!, $name: String!) {
+  engagerManager(user: $user, name: $name) {
+    name
+  }
+}
+mutation Cash($user: String!, $name: String!) {
+  acheterCashUpgrade(user: $user, name: $name) {
+    name
+  }
+}
+mutation Angel($user: String!, $name: String!) {
+  acheterAngelUpgrade(user: $user, name: $name) {
+    name
+  }
+}
+mutation Reset($user: String!) {
+  resetWorld(user: $user) {
+    ...Kingdom
+  }
+}
