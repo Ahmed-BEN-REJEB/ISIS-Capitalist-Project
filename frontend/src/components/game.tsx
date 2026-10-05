@@ -417,7 +417,8 @@ export function Game() {
                       kind === "angelupgrades"
                         ? world.activeangels
                         : world.money;
-                    const items = world[kind].filter((p) => !p.unlocked);
+                    const items = world[kind];
+                    const acquired = items.filter((p) => p.unlocked).length;
                     return (
                       <>
                         {panel === "upgrades" && (
@@ -463,14 +464,17 @@ export function Game() {
                         <div className="modal-balance">
                           Disponible : {number(currency)}{" "}
                           {kind === "angelupgrades" ? "anges" : "or"}
+                          <span className="collection-progress">
+                            {acquired} acquis sur {items.length}
+                          </span>
                         </div>
-                        {!items.length && (
-                          <p className="empty-state">
-                            Tout est acquis. Votre royaume est prêt.
-                          </p>
-                        )}
                         {items.map((p) => (
-                          <div className="reward" key={p.name}>
+                          <div
+                            className={
+                              "reward " + (p.unlocked ? "reward-acquired" : "")
+                            }
+                            key={p.name}
+                          >
                             <RewardImage origin={origin} reward={p} />
                             <div className="reward-info">
                               <h3>{p.name}</h3>
@@ -481,28 +485,34 @@ export function Game() {
                                   : effect(p)}
                               </small>
                             </div>
-                            <button
-                              disabled={disabled || currency < p.seuil}
-                              onClick={() =>
-                                void game.act({
-                                  kind:
-                                    kind === "managers"
-                                      ? "hire"
-                                      : kind === "upgrades"
-                                        ? "cash"
-                                        : "angel",
-                                  name: p.name,
-                                })
-                              }
-                            >
-                              <span>
-                                {kind === "managers" ? "Engager" : "Acquérir"}
+                            {p.unlocked ? (
+                              <span className="reward-state">
+                                {kind === "managers" ? "Engagé" : "Acquis"}
                               </span>
-                              <strong>
-                                {number(p.seuil)}{" "}
-                                {kind === "angelupgrades" ? "anges" : "or"}
-                              </strong>
-                            </button>
+                            ) : (
+                              <button
+                                disabled={disabled || currency < p.seuil}
+                                onClick={() =>
+                                  void game.act({
+                                    kind:
+                                      kind === "managers"
+                                        ? "hire"
+                                        : kind === "upgrades"
+                                          ? "cash"
+                                          : "angel",
+                                    name: p.name,
+                                  })
+                                }
+                              >
+                                <span>
+                                  {kind === "managers" ? "Engager" : "Acquérir"}
+                                </span>
+                                <strong>
+                                  {number(p.seuil)}{" "}
+                                  {kind === "angelupgrades" ? "anges" : "or"}
+                                </strong>
+                              </button>
+                            )}
                           </div>
                         ))}
                       </>

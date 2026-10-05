@@ -693,6 +693,24 @@ dialog::backdrop {
   font-size: 12px;
   margin: 14px 0;
 }
+.collection-progress {
+  float: right;
+  color: var(--muted);
+}
+.reward-acquired {
+  border-color: #78916d;
+  background: #e5ecd9;
+}
+.reward-state {
+  min-width: 102px;
+  padding: 9px 12px;
+  border: 1px solid #78916d;
+  border-radius: 5px;
+  color: #34512e;
+  background: #f0f4e8;
+  text-align: center;
+  font-weight: bold;
+}
 .reward {
   display: flex;
   align-items: center;
@@ -1195,6 +1213,17 @@ dialog::backdrop {
     bottom: 12px;
     right: 12px;
     max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 640px) {
+  .collection-progress {
+    float: none;
+    display: block;
+    margin-top: 4px;
+  }
+  .reward-state {
+    margin-left: 70px;
+    flex: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

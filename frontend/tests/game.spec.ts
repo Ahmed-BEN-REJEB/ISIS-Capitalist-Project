@@ -59,9 +59,14 @@ test("production, achats, managers, persistance et isolation de deux joueurs", a
   await page
     .getByRole("button", { name: "Engager 100 or", exact: true })
     .click();
-  await expect(
-    page.getByRole("heading", { name: "Commandant Marcus", exact: true }),
-  ).toHaveCount(0);
+  const marcus = page
+    .getByRole("heading", { name: "Commandant Marcus", exact: true })
+    .locator("..")
+    .locator("..");
+  await expect(marcus).toContainText("Engagé");
+  await expect(page.locator(".collection-progress")).toContainText(
+    "1 acquis sur 6",
+  );
   await page.getByRole("button", { name: "Fermer" }).click();
   await expect(warrior.locator(".status")).toHaveText("AUTO");
   const savedMoney = await query(
@@ -70,6 +75,14 @@ test("production, achats, managers, persistance et isolation de deux joueurs", a
   await page.waitForTimeout(1200);
   await page.reload();
   await expect(warrior.locator(".status")).toHaveText("AUTO");
+  await page.getByRole("button", { name: /Managers/ }).click();
+  await expect(
+    page
+      .getByRole("heading", { name: "Commandant Marcus", exact: true })
+      .locator("..")
+      .locator(".."),
+  ).toContainText("Engagé");
+  await page.getByRole("button", { name: "Fermer" }).click();
   const resumedMoney = await query(
     '{getWorld(user:"' + user + '-second"){money}}',
   );
@@ -123,9 +136,14 @@ test("bonus individuels et collectifs, achats Max, anges et renaissance", async 
   await page
     .getByRole("button", { name: "Acquérir 1 000 or", exact: true })
     .click();
-  await expect(
-    page.getByRole("heading", { name: "Forge du guerrier" }),
-  ).toHaveCount(0);
+  const forge = page
+    .getByRole("heading", { name: "Forge du guerrier" })
+    .locator("..")
+    .locator("..");
+  await expect(forge).toContainText("Acquis");
+  await expect(page.locator(".collection-progress")).toContainText(
+    "1 acquis sur 11",
+  );
   await page.getByRole("button", { name: "Fermer" }).click();
   await page.getByRole("button", { name: /Investors/ }).click();
   await page.getByRole("button", { name: /Reset du monde/ }).click();
@@ -142,9 +160,25 @@ test("bonus individuels et collectifs, achats Max, anges et renaissance", async 
   await page
     .getByRole("button", { name: "Acquérir 10 anges", exact: true })
     .click();
+  const blessing = page
+    .getByRole("heading", { name: "Bénédiction du champ de bataille" })
+    .locator("..")
+    .locator("..");
+  await expect(blessing).toContainText("Acquis");
+  await expect(page.locator(".collection-progress")).toContainText(
+    "1 acquis sur 3",
+  );
   await expect(page.locator(".modal-balance")).toContainText("140");
   await page.reload();
   await expect(page.locator(".resource-button")).toContainText("140");
+  await page.getByRole("button", { name: /Upgrades/ }).click();
+  await page.getByRole("button", { name: /Bénédictions/ }).click();
+  await expect(
+    page
+      .getByRole("heading", { name: "Bénédiction du champ de bataille" })
+      .locator("..")
+      .locator(".."),
+  ).toContainText("Acquis");
 });
 test("responsive, images, clavier et erreurs réseau", async ({ page }) => {
   await select(page, "visual-" + Date.now());
