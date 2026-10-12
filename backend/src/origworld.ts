@@ -259,3 +259,16 @@ export const origworld: World = {
     ),
   ],
 };
+
+// Preserve legacy asset URLs while making each targeted reward identifiable.
+for (const upgrade of origworld.upgrades) {
+  if (upgrade.idcible > 0) {
+    upgrade.logo = products.find(
+      (product) => product.id === upgrade.idcible,
+    )!.logo;
+  }
+}
+const portraits = ['marcus', 'elric', 'kael', 'drax', 'vorn', 'arkon'];
+origworld.managers.forEach((manager, index) => {
+  manager.logo = `icones/${portraits[index]}.webp`;
+});

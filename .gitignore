@@ -1,0 +1,12 @@
+/tmp/
+/artifacts/
+**/node_modules/
+**/.angular/
+**/dist/
+**/out-tsc/
+**/test-results/
+**/playwright-report/
+*.tsbuildinfo
+**/.env*
+!**/.env.example
+/docs/

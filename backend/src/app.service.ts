@@ -6,7 +6,8 @@ import { origworld } from './origworld.js';
 
 @Injectable()
 export class AppService {
-  private readonly worldsDir = path.join(process.cwd(), 'userworlds');
+  private readonly worldsDir =
+    process.env.WORLDS_DIR || path.join(process.cwd(), 'userworlds');
 
   constructor() {
     fs.mkdirSync(this.worldsDir, { recursive: true });
@@ -26,7 +27,22 @@ export class AppService {
       return this.cloneWorld(origworld);
     }
     const world: unknown = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    return this.assertWorld(world);
+    const saved = this.assertWorld(world);
+    // Cosmetic migration only: never reset a player's progression.
+    for (const group of ['managers', 'upgrades'] as const) {
+      for (const item of saved[group]) {
+        const current = origworld[group].find(
+          (entry) => entry.name === item.name,
+        );
+        if (
+          current &&
+          ['icones/manager.svg', 'icones/upgrade.svg'].includes(item.logo)
+        ) {
+          item.logo = current.logo;
+        }
+      }
+    }
+    return saved;
   }
 
   saveWorld(user: string, world: World): void {
