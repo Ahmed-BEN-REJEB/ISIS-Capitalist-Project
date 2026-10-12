@@ -1,0 +1,61 @@
+@let p = prod();
+<article
+  class="product-card"
+  [class.unowned]="!p.quantite"
+  [attr.data-testid]="'product-' + p.id"
+>
+  <button
+    class="portrait-button"
+    [disabled]="gameService.disabled() || !p.quantite || running() || p.managerUnlocked"
+    (click)="startFabrication()"
+    [attr.aria-label]="'Lancer la production : ' + p.name"
+    [title]="p.managerUnlocked ? 'Production automatique' : running() ? 'Production en cours' : 'Cliquez pour produire'"
+  >
+    <img
+      [src]="asset(gameService.server(), p.logo)"
+      [alt]="p.name"
+      width="112"
+      height="112"
+    />
+    <span class="quantity">× {{ p.quantite | bigvalue }}</span>
+    @if (!running() && p.quantite > 0 && !p.managerUnlocked) {
+    <span class="play-hint">Produire</span> }
+  </button>
+  <div class="product-content">
+    <div class="product-heading">
+      <h3>{{ p.name }}</h3>
+      <span class="status" [class.automatic]="p.managerUnlocked"
+        >{{ p.managerUnlocked ? 'AUTO' : p.quantite ? 'MANUEL' : 'À RECRUTER'
+        }}</span
+      >
+    </div>
+    <div
+      class="production"
+      role="progressbar"
+      [attr.aria-label]="'Production de ' + p.name"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="round(progress())"
+    >
+      <div class="production-fill" [style.width.%]="progress()"></div>
+      <span>+ {{ income() | bigvalue }} <small>or / cycle</small></span>
+    </div>
+    <div class="purchase-row">
+      <button class="buy-button" [disabled]="!canBuy()" (click)="buy()">
+        <span>Recruter ×{{ numberToBuy() }}</span>
+        <strong>{{ price() | bigvalue }} or</strong>
+      </button>
+      <time class="timer"
+        >{{ (running() ? p.timeleft : p.vitesse) | second }}<small
+          >{{ running() ? 'restant' : 'par cycle' }}</small
+        ></time
+      >
+    </div>
+    <div class="milestone">
+      @if (next(); as palier) {
+      <span>Prochain palier · {{ palier.seuil }} unités</span>
+      <span>{{ min(p.quantite, palier.seuil) }}/{{ palier.seuil }}</span>
+      } @else { <span>Tous les paliers atteints</span><span></span> }
+    </div>
+  </div>
+</article>

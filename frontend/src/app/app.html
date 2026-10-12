@@ -1,0 +1,344 @@
+<div class="app-shell">
+  <a href="#army" class="skip-link">Aller aux unités</a>
+  <aside class="sidebar">
+    <div class="brand">
+      <img
+        [src]="asset(gameService.server(), world()?.logo || 'icones/war-world.svg')"
+        width="70"
+        height="70"
+        alt=""
+      />
+      <div><span>WAR TOY</span><strong>KINGDOM</strong></div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <p class="nav-label">VOTRE DOMAINE</p>
+    <button class="nav-item selected" (click)="close()">Royaume</button>
+    @for (item of menu(); track item.panel) {
+    <button class="nav-item" [disabled]="!world()" (click)="open(item.panel)">
+      <span>{{ item.label }}</span>
+      @if (item.count) { <span class="badge">{{ item.count }}</span> }
+    </button>
+    }
+    <div class="sidebar-bottom">
+      <button class="text-button" (click)="open('help')">Règles du jeu</button>
+      <small>ISIS CAPITALIST · ÉDITION MÉDIÉVALE</small>
+    </div>
+  </aside>
+  <main>
+    <header class="topbar">
+      <div>
+        <span class="eyebrow">VOTRE CAMPAGNE</span>
+        <p>{{ world()?.name || 'War Toy Kingdom' }}</p>
+      </div>
+      <div class="top-actions">
+        <span class="connection" [class.offline]="!!gameService.error()">
+          {{ gameService.error() ? 'À resynchroniser' : world() ? 'Sauvegarde
+          serveur' : 'Connexion…' }}
+        </span>
+        <button class="account-button" (click)="open('settings')">
+          <span class="avatar"
+            >{{ gameService.user().slice(0, 1).toUpperCase() || 'J' }}</span
+          >
+          {{ gameService.user() || 'Votre royaume' }}
+        </button>
+        <button
+          class="icon-button"
+          (click)="gameService.refreshWorld()"
+          [disabled]="gameService.busy()"
+          aria-label="Actualiser le monde"
+          title="Actualiser"
+        >
+          Actualiser
+        </button>
+      </div>
+    </header>
+    <section class="hero" [style.background-image]="heroBackground()">
+      <h1>{{ world()?.name || 'War Toy Kingdom' }}</h1>
+      <p>Développez votre armée et les revenus de votre royaume.</p>
+    </section>
+    @if (gameService.error()) {
+    <div class="error-banner" role="alert">
+      <div>
+        <strong>La liaison avec le royaume est interrompue.</strong>
+        <p>{{ gameService.error() }}</p>
+      </div>
+      <button (click)="gameService.refreshWorld()">Réessayer</button>
+    </div>
+    } @if (world(); as w) {
+    <section class="treasury" aria-label="Ressources du royaume">
+      <div class="main-resource">
+        <div>
+          <span class="eyebrow">TRÉSOR DU ROYAUME</span>
+          <strong data-testid="money"
+            >{{ w.money | bigvalue }} <small>or</small></strong
+          >
+        </div>
+      </div>
+      <div class="resource">
+        <span>Revenus automatiques</span>
+        <strong>{{ autoIncome() | bigvalue }} <small>or / s</small></strong>
+      </div>
+      <button class="resource resource-button" (click)="open('investors')">
+        <span>Anges actifs</span>
+        <strong
+          >{{ w.activeangels | bigvalue }}
+          <small
+            >+{{ w.activeangels * w.angelbonus | bigvalue }} %</small
+          ></strong
+        >
+      </button>
+    </section>
+    <section id="army" class="army-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">L’ARMÉE DU ROYAUME</span>
+          <h2>Vos forces en campagne</h2>
+        </div>
+        <button
+          class="multiplier"
+          aria-label="Quantité d’achat"
+          (click)="cycleQuantity()"
+        >
+          Recrutement
+          <strong>{{ qtmulti() === 'Max' ? 'Max' : '×' + qtmulti() }}</strong>
+        </button>
+      </div>
+      <p class="army-tip">
+        Cliquez sur une unité pour lancer sa production. Un commandant la rend
+        automatique, même en votre absence.
+      </p>
+      <div class="product-grid">
+        @for (p of w.products; track p.id) {
+        <app-produit [prod]="p" [qtmulti]="qtmulti()" />
+        }
+      </div>
+    </section>
+    <footer class="game-footer">
+      <span
+        >Progression propre à <strong>{{ gameService.user() }}</strong></span
+      >
+    </footer>
+    } @else {
+    <section class="loading-state" role="status">
+      <h2>
+        {{ gameService.error() ? 'Le royaume vous attend' : 'Ouverture des
+        portes…' }}
+      </h2>
+      <p>Votre progression est conservée sur le serveur.</p>
+      <button (click)="open('settings')">Configurer la connexion</button>
+    </section>
+    }
+  </main>
+  <div class="toast-region" aria-live="polite" aria-atomic="true">
+    @if (gameService.snackmessage()) {
+    <div class="toast">{{ gameService.snackmessage() }}</div>
+    }
+  </div>
+  @if (panel()) {
+  <app-modal [title]="title()" (closed)="close()">
+    @if (panel() === 'settings') {
+    <form class="settings-form" (submit)="commitName($event)">
+      <p>
+        Chaque identifiant possède son propre monde. Réutilisez le même pour
+        retrouver votre partie.
+      </p>
+      <label
+        >Identifiant du joueur
+        <input [formField]="loginForm.user" autocomplete="username" />
+      </label>
+      <label
+        >Adresse du backend
+        <input type="url" [formField]="loginForm.origin" />
+      </label>
+      <button class="primary-button" type="submit">
+        Entrer dans ce royaume
+      </button>
+    </form>
+    } @else if (panel() === 'help') {
+    <div class="guide">
+      <p>
+        <strong>1. Produisez.</strong> Cliquez sur le portrait d’une unité
+        possédée. L’or arrive à la fin du cycle.
+      </p>
+      <p>
+        <strong>2. Recrutez.</strong> Passez de ×1 à ×10, ×100 ou Max. Le prix
+        augmente avec chaque unité.
+      </p>
+      <p>
+        <strong>3. Déléguez.</strong> Vos commandants produisent
+        automatiquement, y compris hors connexion.
+      </p>
+      <p>
+        <strong>4. Progressez.</strong> L’arsenal et les paliers augmentent vos
+        revenus ou votre vitesse. Un emblème collectif concerne toute l’armée.
+      </p>
+      <p>
+        <strong>5. Transmettez.</strong> Réclamez des anges pour recommencer
+        plus fort. Les bénédictions coûtent des anges actifs : leur bonus passif
+        diminue lorsque vous les dépensez.
+      </p>
+    </div>
+    } @else if (world(); as w) { @if (panel() === 'unlocks') {
+    <p class="muted">
+      Ces bonus sont gratuits et automatiques. Les paliers collectifs exigent le
+      seuil sur chaque unité.
+    </p>
+    <label class="check"
+      ><input
+        type="checkbox"
+        [checked]="allUnlocks()"
+        (change)="allUnlocks.set($any($event.target).checked)"
+      />
+      Afficher tous les paliers</label
+    >
+    @for (group of unlockGroups(); track group.name) {
+    <section class="unlock-group">
+      <h3>{{ group.name }}</h3>
+      @for (p of group.visible; track p.name) {
+      <div class="reward">
+        <img
+          class="reward-image"
+          [src]="asset(gameService.server(), p.logo)"
+          alt=""
+          width="72"
+          height="72"
+          loading="lazy"
+        />
+        <div class="reward-info">
+          <h4>{{ p.name }}</h4>
+          <p>{{ effect(p) }} · {{ target(w, p) }}</p>
+          <progress
+            [max]="p.seuil"
+            [value]="min(p.seuil, group.quantity)"
+          ></progress>
+          <small
+            >@if (p.unlocked) { Acquis } @else { {{ group.quantity | bigvalue }}
+            / {{ p.seuil | bigvalue }} unités }</small
+          >
+        </div>
+      </div>
+      } @if (!allUnlocks() && group.complete) {
+      <p class="success">Tous les paliers sont acquis.</p>
+      }
+    </section>
+    } } @if (panel() === 'managers' || panel() === 'upgrades') { @if (panel()
+    === 'upgrades') {
+    <div class="upgrade-tabs" role="group" aria-label="Type d’amélioration">
+      <button
+        [attr.aria-pressed]="upgradeKind() === 'upgrades'"
+        (click)="upgradeKind.set('upgrades')"
+      >
+        Arsenal<span class="tab-count">{{ badgeCash() }}</span>
+      </button>
+      <button
+        [attr.aria-pressed]="upgradeKind() === 'angelupgrades'"
+        (click)="upgradeKind.set('angelupgrades')"
+      >
+        Bénédictions<span class="tab-count">{{ badgeAngels() }}</span>
+      </button>
+    </div>
+    }
+    <p class="modal-description">
+      {{ kind() === 'managers' ? 'Confiez vos unités à un commandant : elles
+      produiront sans interruption.' : kind() === 'upgrades' ? 'Équipez votre
+      armée. Chaque amélioration est permanente jusqu’à la prochaine
+      renaissance.' : 'Ces améliorations coûtent des anges actifs.' }}
+    </p>
+    <div class="modal-balance">
+      Disponible : {{ currency() | bigvalue }} {{ kind() === 'angelupgrades' ?
+      'anges' : 'or' }}
+      <span class="collection-progress"
+        >{{ acquired() }} acquis sur {{ rewards().length }}</span
+      >
+    </div>
+    @for (p of rewards(); track p.name) {
+    <div class="reward" [class.reward-acquired]="p.unlocked">
+      <img
+        class="reward-image"
+        [src]="asset(gameService.server(), p.logo)"
+        alt=""
+        width="72"
+        height="72"
+        loading="lazy"
+      />
+      <div class="reward-info">
+        <h3>{{ p.name }}</h3>
+        <p>{{ target(w, p) }}</p>
+        <small
+          >{{ kind() === 'managers' ? 'Production automatique' : effect(p)
+          }}</small
+        >
+      </div>
+      @if (p.unlocked) {
+      <span class="reward-state"
+        >{{ kind() === 'managers' ? 'Engagé' : 'Acquis' }}</span
+      >
+      } @else {
+      <button
+        [disabled]="gameService.disabled() || currency() < p.seuil"
+        (click)="buyReward(p)"
+      >
+        <span>{{ kind() === 'managers' ? 'Engager' : 'Acquérir' }}</span>
+        <strong
+          >{{ p.seuil | bigvalue }} {{ kind() === 'angelupgrades' ? 'anges' :
+          'or' }}</strong
+        >
+      </button>
+      }
+    </div>
+    } } @if (panel() === 'investors') {
+    <div class="investors">
+      <div class="angel-stats">
+        <div>
+          <strong>{{ w.activeangels | bigvalue }}</strong
+          ><span>anges actifs</span>
+        </div>
+        <div>
+          <strong>{{ w.angelbonus }} %</strong><span>par ange actif</span>
+        </div>
+        <div>
+          <strong>+{{ angelsGained(w) | bigvalue }}</strong
+          ><span>anges à réclamer</span>
+        </div>
+      </div>
+      <p>
+        Score cumulé : {{ w.score | bigvalue }} · Anges obtenus au total : {{
+        w.totalangels | bigvalue }}.
+      </p>
+      <p class="muted">
+        Recommencer réinitialise l’or, les unités, les commandants et les
+        améliorations. Votre score et vos anges restants sont conservés.
+      </p>
+      @if (confirmReset()) {
+      <div class="reset-confirm">
+        <strong
+          >Réinitialiser le monde et récupérer {{ angelsGained(w) | bigvalue }}
+          anges ?</strong
+        >
+        <div>
+          <button (click)="confirmReset.set(false)">Annuler</button>
+          <button
+            class="danger-button"
+            [disabled]="gameService.disabled()"
+            (click)="reset()"
+          >
+            Confirmer le reset
+          </button>
+        </div>
+      </div>
+      } @else {
+      <button
+        class="primary-button"
+        [disabled]="gameService.disabled()"
+        (click)="confirmReset.set(true)"
+      >
+        Reset du monde
+      </button>
+      } @if (angelsGained(w) === 0) {
+      <p class="reset-warning">Ce reset ne rapporte aucun nouvel ange.</p>
+      }
+    </div>
+    } }
+  </app-modal>
+  }
+</div>

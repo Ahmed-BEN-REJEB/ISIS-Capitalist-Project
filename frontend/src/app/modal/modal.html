@@ -1,0 +1,16 @@
+<dialog
+  #dialog
+  (cancel)="cancel($event)"
+  (click)="backdrop($event)"
+  aria-labelledby="modal-title"
+>
+  <div class="modal-inner">
+    <header class="modal-header">
+      <div><h2 id="modal-title">{{ title() }}</h2></div>
+      <button class="icon-button" (click)="closed.emit()" aria-label="Fermer">
+        Fermer
+      </button>
+    </header>
+    <ng-content />
+  </div>
+</dialog>
